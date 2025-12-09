@@ -12,6 +12,10 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Константы для ключей сохранения состояния
+    private static final String KEY_COUNTER = "counter";
+    private static final String KEY_HISTORY = "history";
+
     private TextView counterValue;
     private ListView historyList;
     private int x = 0;
@@ -24,12 +28,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         counterValue = findViewById(R.id.counterValue);
         historyList = findViewById(R.id.historyList);
+        if (savedInstanceState != null) {
+            x = savedInstanceState.getInt(KEY_COUNTER, 0);
+            history = savedInstanceState.getStringArrayList(KEY_HISTORY);
+            if (history == null) {
+                history = new ArrayList<>();
+            }
+        }
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, history);
         historyList.setAdapter(adapter);
         findViewById(R.id.plus).setOnClickListener(v -> change(1));
         findViewById(R.id.minus).setOnClickListener(v -> change(-1));
         findViewById(R.id.zero).setOnClickListener(v -> reset());
         update();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_COUNTER, x);
+        outState.putStringArrayList(KEY_HISTORY, history);
     }
 
     private void change(int n) {
@@ -55,12 +73,5 @@ public class MainActivity extends AppCompatActivity {
         String entry = time + " - " + operation + " с " + y + " до " + x;
         history.add(0, entry);
         adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("counter", x);
-        outState.putStringArrayList("history", history);
     }
 }
